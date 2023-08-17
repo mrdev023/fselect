@@ -90,6 +90,9 @@ pub struct Searcher<'a> {
     file_exif_metadata: Option<HashMap<String, String>>,
     file_exif_metadata_set: bool,
 
+    file_content: Option<String>,
+    file_content_set: bool,
+
     pub error_count: i32,
 }
 
@@ -137,6 +140,9 @@ impl <'a> Searcher<'a> {
 
             file_exif_metadata: None,
             file_exif_metadata_set: false,
+
+            file_content: None,
+            file_content_set: false,
 
             error_count: 0,
         }
@@ -706,6 +712,13 @@ impl <'a> Searcher<'a> {
         if !self.file_line_count_set {
             self.file_line_count_set = true;
             self.file_line_count = crate::util::get_line_count(entry);
+        }
+    }
+
+    fn update_file_content(&mut self, entry: &DirEntry) {
+        if !self.file_content_set {
+            self.file_content_set = true;
+            self.file_content = crate::util::get_file_content(entry);
         }
     }
 
@@ -1302,6 +1315,13 @@ impl <'a> Searcher<'a> {
 
                 if let Some(line_count) = self.file_line_count {
                     return Variant::from_int(line_count as i64);
+                }
+            },
+            Field::Content => {
+                self.update_file_content(entry);
+
+                if let Some(content) = self.file_content.as_ref() {
+                    return Variant::from_string(content);
                 }
             },
             Field::Mime => {

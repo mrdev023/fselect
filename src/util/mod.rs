@@ -623,6 +623,19 @@ pub fn get_line_count(entry: &DirEntry) -> Option<usize> {
     None
 }
 
+pub fn get_file_content(entry: &DirEntry) -> Option<String> {
+    if let Ok(file) = File::open(&entry.path()) {
+        let mut reader = BufReader::with_capacity(1024 * 32, file);
+        let mut content = String::new();
+        return match reader.read_to_string(&mut content) {
+            Ok(_) => Some(content),
+            Err(_) => None
+        }
+    }
+
+    None
+}
+
 pub fn get_sha1_file_hash(entry: &DirEntry) -> String {
     if let Ok(mut file) = File::open(&entry.path()) {
         let mut hasher = sha1::Sha1::new();
